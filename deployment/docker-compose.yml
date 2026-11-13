@@ -1,0 +1,56 @@
+
+services:
+  mysql:
+    image: mysql:8.0.44
+    container_name: churn-mysql
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+
+    ports:
+      - "127.0.0.1:3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    image: churn-backend:latest
+    container_name: churn-backend
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/CUSTOMER_CHURN_OPS
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SNOWFLAKE_USERNAME: ${SNOWFLAKE_USERNAME}
+      SNOWFLAKE_PASSWORD: ${SNOWFLAKE_PASSWORD}
+
+    expose:
+      - "8080"
+
+  frontend:
+    image: churn-frontend:latest
+    container_name: churn-frontend
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "8081:80"
+
+volumes:
+  mysql_data:

@@ -1,0 +1,25 @@
+# Environment files and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Frontend dependencies and build output
+**/node_modules/
+**/dist/
+
+# Backend build output
+**/target/
+
+# IDE settings
+**/.idea/
+**/.vscode/
+
+# Docker image archives
+*.tar
+
+# Logs
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
